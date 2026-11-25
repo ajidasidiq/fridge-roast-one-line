@@ -12,6 +12,15 @@ const LINE =
 if (LINE.length < 1 || LINE.length > 200) {
   throw new Error(`entry is ${LINE.length} chars, must be 1-200`);
 }
+// The entry must be exactly the line: no padding spaces around it, and
+// its UTF-8 byte length must fit the same 200 limit (a multi-byte char
+// could otherwise pass the char count while busting a byte-based gate).
+if (LINE !== LINE.trim()) {
+  throw new Error("entry has leading or trailing whitespace");
+}
+if (Buffer.byteLength(LINE, "utf8") > 200) {
+  throw new Error(`entry is ${Buffer.byteLength(LINE, "utf8")} bytes, must be at most 200`);
+}
 if (LINE.includes("\n") || /[\u0000-\u001f]/.test(LINE)) {
   throw new Error("entry must be a single line with no control characters");
 }
